@@ -16,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_TITLE || "Eventos Now",
-  description: process.env.NEXT_PUBLIC_DESCRIPTION || "Sistema para Pesquisa em Eventos",
+  description:
+    process.env.NEXT_PUBLIC_DESCRIPTION || "Sistema para Pesquisa em Eventos",
 };
 
 export default function RootLayout({
