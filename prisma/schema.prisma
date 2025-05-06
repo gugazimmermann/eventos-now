@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Auth {
+  id        String    @id @default(uuid())
+  cognitoId String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Company   Company[]
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  authId    String
+  document  String
+  name      String
+  email     String   @unique
+  phone     String
+  owner     String
+  addressId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Auth      Auth     @relation(fields: [authId], references: [id])
+  Address   Address  @relation(fields: [addressId], references: [id])
+}
+
+model Address {
+  id           String    @id @default(uuid())
+  street       String
+  number       String?
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  country      String
+  zipCode      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  Company      Company[]
+  Event        Event[]
+}
+
+model Event {
+  id          String        @id @default(uuid())
+  title       String
+  description String
+  slug        String        @unique
+  imageUrl    String
+  startDate   DateTime
+  endDate     DateTime
+  addressId   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  Address     Address       @relation(fields: [addressId], references: [id])
+  EventConfig EventConfig[]
+}
+
+model EventConfig {
+  id               String  @id @default(uuid())
+  confirmationType String
+  hasGift          Boolean
+  giftDescription  String
+  hasPrize         Boolean
+  prizeDescription String
+  eventId          String
+  Event            Event   @relation(fields: [eventId], references: [id])
+}
