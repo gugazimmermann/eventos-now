@@ -1,0 +1,117 @@
+import { FieldConfig } from '@/app/dashboard/components/Form';
+import { brazilianStates } from '@/app/utils/states';
+
+export const fields: FieldConfig[] = [
+  {
+    label: 'Nome do Evento',
+    name: 'name',
+    type: 'text',
+    required: true,
+    width: 'full',
+  },
+  {
+    label: 'Descrição',
+    name: 'description',
+    type: 'textarea',
+    required: true,
+    width: 'full',
+  },
+  {
+    label: 'URL - https://www.eventosnow.com.br/{url}',
+    name: 'slug',
+    type: 'text',
+    required: false,
+  },
+  {
+    label: 'Logo',
+    name: 'logo',
+    type: 'file',
+    required: false,
+    accept: 'image/jpeg,image/png',
+  },
+  {
+    label: 'CEP',
+    name: 'addressZipCode',
+    type: 'text',
+    required: true,
+  },
+  { label: 'Rua', name: 'addressStreet', type: 'text', required: true },
+  {
+    label: 'Número',
+    name: 'addressNumber',
+    type: 'text',
+    required: false,
+  },
+  {
+    label: 'Complemento',
+    name: 'addressComplement',
+    type: 'text',
+    required: false,
+  },
+  {
+    label: 'Bairro',
+    name: 'addressNeighborhood',
+    type: 'text',
+    required: true,
+  },
+  {
+    label: 'Cidade',
+    name: 'addressCity',
+    type: 'text',
+    required: true,
+  },
+  {
+    label: 'Estado',
+    name: 'addressState',
+    type: 'select',
+    required: true,
+    options: brazilianStates,
+  },
+  {
+    label: 'País',
+    name: 'addressCountry',
+    type: 'select',
+    required: true,
+    disabled: true,
+    options: [{ value: 'BR', label: 'Brasil' }],
+  },
+  {
+    label: 'Data de Início',
+    name: 'startDate',
+    type: 'datetime-local',
+    required: true,
+  },
+  {
+    label: 'Data de Término',
+    name: 'endDate',
+    type: 'datetime-local',
+    required: true,
+  },
+  {
+    label: 'Tipo de Confirmação',
+    name: 'confirmationType',
+    type: 'select',
+    required: true,
+    width: 'full',
+    options: [
+      { label: 'Email', value: 'email' },
+      { label: 'SMS', value: 'sms' },
+    ],
+  },
+  { label: 'Tem brinde?', name: 'hasGift', type: 'checkbox' },
+  {
+    label: 'Descrição do Brinde',
+    name: 'giftDescription',
+    type: 'textarea',
+    width: 'full',
+    showIf: form => !!form.hasGift,
+  },
+  { label: 'Tem prêmio?', name: 'hasPrize', type: 'checkbox' },
+  {
+    label: 'Descrição do Prêmio',
+    name: 'prizeDescription',
+    type: 'textarea',
+    width: 'full',
+    showIf: form => !!form.hasPrize,
+  },
+];

@@ -1,34 +1,63 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import DashboardLayout from "./components/DashboardLayout";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Event } from '@/generated/prisma';
+import DashboardLayout from '@/app/dashboard/layout/DashboardLayout';
+import EventsCard from '@/app/dashboard/components/EventsCard';
 
-export default function Home() {
-  const title = process.env.NEXT_PUBLIC_TITLE || "Eventos Now";
-
-  const [companyName, setCompanyName] = useState<string | null>(null);
+export default function Dashboard() {
+  const router = useRouter();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchCompanyName() {
-      const res = await fetch("/api/me");
-      const data = await res.json();
-      if (data.success && data.company && data.company.name) {
-        setCompanyName(data.company.name);
-      } else {
-        setCompanyName(null);
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('/api/dashboard/events');
+        const data = await response.json();
+
+        if (data.success) {
+          setEvents(data.events);
+          if (data.events.length === 0) {
+            router.push('/dashboard/event');
+          }
+        } else {
+          setError('Erro ao carregar eventos');
+        }
+      } catch {
+        setError('Erro ao carregar eventos');
+      } finally {
+        setLoading(false);
       }
-    }
-    fetchCompanyName();
-  }, []);
+    };
+
+    fetchEvents();
+  }, [router]);
 
   return (
-    <DashboardLayout companyName={companyName}>
-      <div className="flex flex-col items-center justify-center min-h-screen gap-8">
-        <h1 className="text-3xl font-bold">{title}</h1>
-        <div>
-          <span className="font-semibold">Company Name: </span>
-          {companyName !== null ? companyName : "Carregando..."}
-        </div>
+    <DashboardLayout>
+      <div className="flex flex-col w-full max-w-[2000px] p-4">
+        {loading && (
+          <div className="text-center">
+            <p>Carregando eventos...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center text-red-500">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {events.map(event => (
+              <EventsCard key={event.id} event={event} />
+            ))}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

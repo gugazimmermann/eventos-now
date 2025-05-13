@@ -1,4 +1,4 @@
-export function NotificationIcon({ size = 24, color = "currentColor" }) {
+export function NotificationIcon({ size = 24, color = 'currentColor' }) {
   return (
     <svg
       width={size}

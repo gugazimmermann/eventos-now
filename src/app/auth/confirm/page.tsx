@@ -1,85 +1,47 @@
-"use client";
+'use client';
 
-import { useMemo, useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "react-toastify";
-import AuthForm from "@/app/auth/components/AuthForm";
-import { confirmSchema } from "@/schemas/auth/confirm";
-import { fields } from "./fields";
+import { useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+import AuthForm from '@/app/auth/components/AuthForm';
+import { confirmSchema } from '@/schemas/auth/confirm';
+import { fields as baseFields } from './fields';
+import { useAuthForm } from '@/app/hooks/useAuthForm';
+import { formValuesToString } from '@/app/utils/formatters';
 
 export default function ConfirmPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const emailFromQuery = searchParams.get("email");
-  const [loading, setLoading] = useState(false);
+  const emailFromQuery = searchParams.get('email');
 
-  const initialFormValues = useMemo(() => {
-    const values: Record<string, string> = {};
-    fields.forEach((field) => {
-      values[field.name] = "";
-    });
-    return values;
-  }, []);
-
-  const [formValues, setFormValues] =
-    useState<Record<string, string>>(initialFormValues);
-
-  const handleChange = useCallback((name: string, value: string) => {
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }, []);
-
-  useEffect(() => {
-    if (emailFromQuery) {
-      setFormValues((prev) => ({ ...prev, email: emailFromQuery }));
-    }
+  const computedFields = useMemo(() => {
+    return baseFields.map(field =>
+      field.name === 'email' && emailFromQuery ? { ...field, disabled: true } : field
+    );
   }, [emailFromQuery]);
 
-  const handleSubmit = useCallback(
-    async (form: Record<string, string>) => {
-      const result = confirmSchema.safeParse(form);
-      if (!result.success) {
-        result.error.errors.forEach((err) => {
-          toast.error(err.message);
-        });
-        return;
-      }
-      setLoading(true);
-      try {
-        const res = await fetch("/api/auth/confirm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        });
-        const data = await res.json();
-        if (data.success) {
-          toast.success("Registro confirmado com sucesso!");
-          router.push(`/auth/login?email=${encodeURIComponent(form.email)}`);
-        } else {
-          toast.error(
-            "Erro ao confirmar o registro: " +
-              (data.error || "Erro desconhecido")
-          );
-        }
-      } catch {
-        toast.error("Erro de rede ao confirmar o registro.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [router]
-  );
+  const { formValues, handleFormChange, handleSubmit, loading } = useAuthForm({
+    fields: computedFields,
+    validationSchema: confirmSchema,
+    apiEndpoint: '/api/auth/confirm',
+    successMessage: 'Registro confirmado com sucesso!',
+    successRedirect: form => `/auth/login?email=${encodeURIComponent(form.email)}`,
+    errorMessage: 'Erro ao confirmar o registro: ',
+    initialValues: computedFields.reduce(
+      (acc, field) => ({
+        ...acc,
+        [field.name]: field.name === 'email' ? emailFromQuery || '' : '',
+      }),
+      {}
+    ),
+  });
 
   return (
     <AuthForm
       title="Confirmar registro"
-      submitLabel={loading ? "Confirmando..." : "Confirmar"}
-      fields={fields}
+      submitLabel={loading ? 'Confirmando...' : 'Confirmar'}
+      fields={computedFields}
       onSubmit={handleSubmit}
-      values={formValues}
-      onChange={handleChange}
+      values={formValuesToString(formValues)}
+      onChange={handleFormChange}
       loading={loading}
     />
   );

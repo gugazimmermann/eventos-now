@@ -1,8 +1,6 @@
-import React from "react";
-
 export function LogoutIcon({
   size = 24,
-  color = "currentColor",
+  color = 'currentColor',
   ...props
 }: React.SVGProps<SVGSVGElement> & { size?: number; color?: string }) {
   return (

@@ -1,5 +1,5 @@
 export default function Home() {
-  const title = process.env.NEXT_PUBLIC_TITLE || "Eventos Now";
+  const title = process.env.NEXT_PUBLIC_TITLE || 'Eventos Now';
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-8">

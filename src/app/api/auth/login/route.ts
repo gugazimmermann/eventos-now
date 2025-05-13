@@ -1,32 +1,32 @@
-import { NextResponse } from "next/server";
-import { InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
-import { calculateSecretHash, cognitoClient } from "@/lib/cognito";
-import { loginSchema } from "@/schemas/auth/login";
-import { authLogger } from "@/lib/logger";
-import { cognitoErrorMap } from "@/utils/cognitoErrorMessages";
+import { NextResponse } from 'next/server';
+import { InitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { calculateSecretHash, cognitoClient } from '@/lib/cognito';
+import { cognitoErrorMap } from '@/utils/cognitoErrorMessages';
+import { loginSchema } from '@/schemas/auth/login';
+import { authLogger } from '@/lib/logger';
 
 export async function POST(request: Request) {
   const data = await request.json();
 
-  authLogger.info("Login request received", { data });
+  authLogger.info('Login request received', { data });
 
   const parseResult = loginSchema.safeParse(data);
   if (!parseResult.success) {
-    authLogger.warn("Login validation error", { issues: parseResult.error.issues });
+    authLogger.warn('Login validation error', { issues: parseResult.error.issues });
     return NextResponse.json(
-      { 
-        success: false, 
-        error: "Erro de validação",
-        issues: parseResult.error.issues 
-      }, 
+      {
+        success: false,
+        error: 'Erro de validação',
+        issues: parseResult.error.issues,
+      },
       { status: 400 }
     );
   }
 
   try {
     const loginCommand = new InitiateAuthCommand({
-      AuthFlow: "USER_PASSWORD_AUTH",
-      ClientId: process.env.COGNITO_CLIENT_ID!,
+      AuthFlow: 'USER_PASSWORD_AUTH',
+      ClientId: process.env.AWS_COGNITO_CLIENT_ID!,
       AuthParameters: {
         USERNAME: data.email,
         PASSWORD: data.password,
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         [key: string]: unknown;
       }
       const err = cognitoError as CognitoError;
-      authLogger.error("Error logging in to Cognito", {
+      authLogger.error('Error logging in to Cognito', {
         name: err?.name,
         message: err?.message,
         code: err?.$metadata?.httpStatusCode,
@@ -56,12 +56,12 @@ export async function POST(request: Request) {
       throw cognitoError;
     }
 
-    authLogger.info("Login successful", { email: data.email });
+    authLogger.info('Login successful', { email: data.email });
 
     const accessToken = authResult.AuthenticationResult?.AccessToken;
 
-    const response = NextResponse.json({ 
-      success: true, 
+    const response = NextResponse.json({
+      success: true,
       email: data.email,
       tokens: authResult.AuthenticationResult,
     });
@@ -79,21 +79,21 @@ export async function POST(request: Request) {
     return response;
   } catch (error: unknown) {
     authLogger.error('Login error:', { error });
-    
+
     if (error instanceof Error) {
       const translated = cognitoErrorMap[error.name] || error.message;
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: translated,
-          errorType: error.name 
-        }, 
+          errorType: error.name,
+        },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
-      { success: false, error: 'An unknown error occurred' }, 
+      { success: false, error: 'An unknown error occurred' },
       { status: 400 }
     );
   }

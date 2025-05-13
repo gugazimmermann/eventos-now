@@ -1,10 +1,10 @@
-import { createHmac } from "crypto";
-import { CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
+import { createHmac } from 'crypto';
+import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
 
 const requiredEnvVars = {
   AWS_REGION: process.env.AWS_REGION,
-  COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID,
-  COGNITO_CLIENT_SECRET: process.env.COGNITO_CLIENT_SECRET,
+  AWS_COGNITO_CLIENT_ID: process.env.AWS_COGNITO_CLIENT_ID,
+  AWS_COGNITO_CLIENT_SECRET: process.env.AWS_COGNITO_CLIENT_SECRET,
 } as const;
 
 Object.entries(requiredEnvVars).forEach(([key, value]) => {
@@ -15,17 +15,17 @@ Object.entries(requiredEnvVars).forEach(([key, value]) => {
 
 const env = {
   AWS_REGION: requiredEnvVars.AWS_REGION as string,
-  COGNITO_CLIENT_ID: requiredEnvVars.COGNITO_CLIENT_ID as string,
-  COGNITO_CLIENT_SECRET: requiredEnvVars.COGNITO_CLIENT_SECRET as string,
+  AWS_COGNITO_CLIENT_ID: requiredEnvVars.AWS_COGNITO_CLIENT_ID as string,
+  AWS_COGNITO_CLIENT_SECRET: requiredEnvVars.AWS_COGNITO_CLIENT_SECRET as string,
 };
 
 export function calculateSecretHash(username: string): string {
-  const message = username + env.COGNITO_CLIENT_ID;
-  const hmac = createHmac('SHA256', env.COGNITO_CLIENT_SECRET);
+  const message = username + env.AWS_COGNITO_CLIENT_ID;
+  const hmac = createHmac('SHA256', env.AWS_COGNITO_CLIENT_SECRET);
   hmac.update(message);
   return hmac.digest('base64');
 }
 
 export const cognitoClient = new CognitoIdentityProviderClient({
   region: env.AWS_REGION,
-}); 
+});

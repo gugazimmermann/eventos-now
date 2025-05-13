@@ -1,14 +1,16 @@
-"use client";
-import { useState } from "react";
-import AuthField from "./AuthField";
+'use client';
+
+import { useState } from 'react';
+import AuthField from './AuthField';
 
 export type Field = {
   label: string;
   name: string;
   type: string;
   required?: boolean;
-  width?: "full";
+  width?: 'full';
   disabled?: boolean;
+  options?: { value: string; label: string }[];
 };
 
 export type Masker = {
@@ -35,20 +37,18 @@ export default function AuthForm({
   onSubmit,
   submitLabel,
   columns = 1,
-  maxWidth = "max-w-sm",
+  maxWidth = 'max-w-sm',
   maskers = {},
   values,
   onChange,
   loading = false,
   links = [],
 }: AuthFormProps) {
-  const [form, setForm] = useState(
-    Object.fromEntries(fields.map((f) => [f.name, ""]))
-  );
+  const [form, setForm] = useState(Object.fromEntries(fields.map(f => [f.name, ''])));
 
   const formState = values ?? form;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     let value = e.target.value;
     const name = e.target.name;
     const masker = maskers[name];
@@ -59,7 +59,7 @@ export default function AuthForm({
     if (onChange) {
       onChange(name, value);
     } else {
-      setForm((prev) => ({
+      setForm(prev => ({
         ...prev,
         [name]: value,
       }));
@@ -80,24 +80,20 @@ export default function AuthForm({
         <h1 className="text-2xl font-bold mb-4 text-center text-strong">{title}</h1>
         <div
           className={`grid gap-4 ${
-            columns === 1
-              ? ""
-              : columns === 2
-              ? "grid-cols-2"
-              : "grid-cols-3"
+            columns === 1 ? '' : columns === 2 ? 'grid-cols-2' : 'grid-cols-3'
           }`}
         >
-          {fields.map((field) => (
+          {fields.map(field => (
             <div
               key={field.name}
               className={
-                field.width === "full"
+                field.width === 'full'
                   ? columns === 3
-                    ? "col-span-3"
+                    ? 'col-span-3'
                     : columns === 2
-                    ? "col-span-2"
-                    : "col-span-1"
-                  : ""
+                      ? 'col-span-2'
+                      : 'col-span-1'
+                  : ''
               }
             >
               <AuthField
@@ -108,6 +104,7 @@ export default function AuthForm({
                 required={field.required}
                 disabled={field.disabled || loading}
                 onChange={handleChange}
+                options={field.options}
               />
             </div>
           ))}
@@ -120,12 +117,8 @@ export default function AuthForm({
           {submitLabel}
         </button>
         <div className="flex flex-col gap-1 mt-2">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-strong hover:underline text-center"
-            >
+          {links.map(link => (
+            <a key={link.href} href={link.href} className="text-strong hover:underline text-center">
               {link.text}
             </a>
           ))}
